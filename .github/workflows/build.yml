@@ -44,12 +44,15 @@ jobs:
       run: msbuild UAssetGUI.sln /p:Configuration=Release
 
     - name: Build Publish Binary
-      run: dotnet publish --sc false -c Release -r win-x64 -p:PublishSingleFile=true -o ./_build ./UAssetGUI/UAssetGUI.csproj
+      run: dotnet publish --sc false -c Release -r win-x64 -p:PublishSingleFile=true -o ./build ./UAssetGUI/UAssetGUI.csproj
 
-    - id: vars
+    - name: Get Short SHA
+      id: vars
+      shell: bash
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-      
-    - uses: bbonkr/get-version-action@v1
+
+    - name: Get Project Version
+      uses: bbonkr/get-version-action@v1
       id: get_version
       with:
         project: './UAssetGUI/UAssetGUI.csproj'
@@ -59,4 +62,12 @@ jobs:
       uses: actions/upload-artifact@v4.6.1
       with:
           name: UAssetGUI-${{ steps.get_version.outputs.version }}-${{ steps.vars.outputs.sha_short }}
-          path: ./_build
+          path: ./build/*.exe
+    
+    - name: Make Experimental Pre-Release
+      uses: softprops/action-gh-release@v2
+      with:
+        prerelease: true        
+        tag_name: experimental-latest
+        name: UAssetGUI-${{ steps.get_version.outputs.version }}-${{ steps.vars.outputs.sha_short }}
+        files: ./build/*.exe
