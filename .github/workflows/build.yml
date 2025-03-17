@@ -41,7 +41,7 @@ jobs:
       run: nuget restore UAssetGUI.sln
 
     - name: Build
-      run: dotnet publish --sc false -c Release -r win-x64 -p:PublishSingleFile=true -o ./build UAssetGUI.sln
+      run: dotnet publish --sc false -c Release -r win-x64 -p:PublishSingleFile=true -o ./build ./UAssetGUI/UAssetGUI.csproj
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
