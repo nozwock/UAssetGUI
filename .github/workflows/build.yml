@@ -40,11 +40,23 @@ jobs:
     - name: Restore packages
       run: nuget restore UAssetGUI.sln
 
-    - name: Build
-      run: dotnet publish --sc false -c Release -r win-x64 -p:PublishSingleFile=true -o ./build ./UAssetGUI/UAssetGUI.csproj
+    - name: Build All
+      run: msbuild UAssetGUI.sln /p:Configuration=Release
 
-    - name: Upload a Build Artifact
+    - name: Build Publish Binary
+      run: dotnet publish --sc false -c Release -r win-x64 -p:PublishSingleFile=true -o ./_build ./UAssetGUI/UAssetGUI.csproj
+
+    - id: vars
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
+    - uses: bbonkr/get-version-action@v1
+      id: get_version
+      with:
+        project: './UAssetGUI/UAssetGUI.csproj'
+        show_log_message: true
+
+    - name: Upload Build Artifact
       uses: actions/upload-artifact@v4.6.1
       with:
-          name: UAssetGUI
-          path: ./build
+          name: UAssetGUI-${{ steps.get_version.outputs.version }}-${{ steps.vars.outputs.sha_short }}
+          path: ./_build
